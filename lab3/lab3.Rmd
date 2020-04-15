@@ -1,0 +1,205 @@
+---
+title: "STAT 33B Lab 3"
+author: "Ziang Gao (3033669851)"
+output: pdf_document
+---
+
+Edit this file, knit to PDF, and:
+
+* Submit the Rmd file on bCourses.
+* Submit the PDF file on Gradescope.
+
+If you think you'll need help with submission, please ask during the lab.
+
+Answer all questions with complete sentences, and put code in code chunks. You
+can make as many new code chunks as you like. Please do not delete the
+exercises already in this notebook, because it may interfere with our grading
+tools.
+
+As you work, you may find it helpful to be able to run your code. You can run a
+single line of code by pressing Ctrl + Enter. You can run an entire code chunk
+by clicking on the green arrow in the upper right corner of the code chunk. 
+
+Knit the document from time to time to make sure that your code runs without
+errors from top to bottom in a fresh R environment. 
+
+The code below controls the number of significant digits shown for the return
+values in your knitted document.
+
+```{r}
+options(digits = 3)
+```
+
+Datasaurus Dozen Data Set
+=========================
+
+Exercise 1 uses the Datasaurus Dozen Data Set from homework 2.
+
+
+Exercise 1
+----------
+
+A "faceted" plot is one that shows several plots side-by-side, to aid
+comparison between them. Each subplot is called a "facet".
+
+You can create a faceted plot with `ggplot2` by using the facet layer. For
+instance, the `facet_wrap()` function creates a line of facets based on a
+single categorical variable. The facet layer should be added to a plot _after_
+the geometry layers.
+
+1.  Read the documentation for `facet_wrap()`, then create a faceted scatter
+    plot that shows each dataset from the Datasaurus Dozen in a separate facet.
+    Use `geom_smooth` with `method = "lm"` to add a linear regression line to
+    each facet.
+
+    _Hint: Unlike other `ggplot2` functions, the facet functions do not accept
+    unquoted variable names. See the documentation for details._
+
+2. Is there any pattern to the regression lines across the different data sets?
+
+```{r}
+dsaur = read.delim("DatasaurusDozen.tsv")
+dsaur
+```
+
+
+```{r}
+# Your code goes here.
+dsaur = read.delim("DatasaurusDozen.tsv")
+library(ggplot2)
+ggplot(dsaur, aes(dsaur$x, dsaur$y))+geom_point()+facet_wrap(dsaur$dataset)+geom_smooth(method = 'lm')
+
+```
+
+YOUR WRITTEN ANSWER GOES HERE:
+Even though the distributions of points in those graph are very different, their regression line have very similar slope. 
+
+
+Bay Area Apartments Data Set
+============================
+
+For the remainder of this lab, you'll continue to analyze the Bay Area
+Apartments Data Set introduced in lab 2.
+
+Recall that the Bay Area Apartments Data Set is a collection of 5852
+advertisements for apartments for rent in the San Francisco Bay Area. The data
+set was collected from Craigslist on Feb 13, 2020.
+
+
+Exercise 2
+----------
+
+Histograms, density plots, and box plots are all good ways to display the
+distribution of a 1-dimensional numerical feature. You can use side-by-side box
+plots to compare a distribution across the levels of a categorical feature, 
+
+1.  Use `ggplot2` to create side-by-side box plots that show the distribution
+    of apartment prices broken down by number of bathrooms. Add descriptive
+    labels and a title to your plot.
+
+    _Hint: The `ggplot2` package treats discrete data and categorical data
+    differently. You can use the `factor()` function to convert a vector or
+    column into categorical data._
+
+2.  Based on your plot, does the number of bathrooms affect the price? If so,
+    how?
+
+```{r}
+# Your code goes here.
+file = readRDS("cl_apartments.rds")
+file
+```
+
+
+```{r}
+file$bathrooms = factor(file$bathrooms)
+ggplot(file, aes(file$bathrooms, file$price))+geom_boxplot() + ggtitle("Price distrition of apartments with different numbers of bathrooms")
+```
+
+YOUR WRITTEN ANSWER GOES HERE:
+Based on my observation of the plot above, the number of bathrooms does affect the price of apartments in the range of 0-3 bathrooms. In that range, as the number of bathrooms increases, the price of apartments tend to increase as well. 
+
+
+Exercise 3
+----------
+
+Bar plots are a good way to display the distribution (that is, the frequencies)
+of a 1-dimensional categorical feature. Groups of bars can be used to compare
+against a second categorical feature.
+
+Get the subset of advertisements for apartments with 0 to 3 bedrooms. For the
+subset, create a bar plot that shows the frequencies of the different laundry
+categories, grouped by the number of bedrooms (on the x-axis). Position the
+bars so that they are side-by-side rather than stacked. Add descriptive labels
+and a title to your plot.
+
+_Hint: You will need to set the `position` parameter for the geometry layer._
+
+```{r}
+# Your code goes here.
+small = file[which(file$bedrooms <= 3),]
+barplot(table(small$laundry, small$bedrooms),beside = TRUE,xlab = "Number of Bedrooms",ylab="Frequency of Laundries") + title("Distribution of Laundries ")
+
+```
+
+Exercise 4
+----------
+
+The `table()` function computes the frequency of each unique value in a vector.
+If you want to inspect the distribution of categories in a categorical feature,
+the `table()` function is a quick alternative to a bar plot. 
+
+Use the `table()` function to compute a two-way table that shows the number of
+bedrooms versus the number of bathrooms for all of the advertisements in
+Oakland and San Francisco. Use the `dnn` parameter to label the appropriate
+dimensions of the table as "Bedrooms" and "Bathrooms".
+
+Which combination of number of bedrooms and number of bathrooms is most common
+among apartment advertisements for these two cities?
+
+
+```{r}
+# Your code goes here.
+sfo = file[which(file$city == 'San Francisco' | file$city == 'Oakland'), ]
+table(bed, bath)
+```
+
+YOUR WRITTEN ANSWER GOES HERE:
+Based on the table above, 1b1b is the most common apartment advertisment. 
+
+
+Exercise 5
+----------
+
+Given a vector, the `order()` function returns the vector of positions that
+sort the vector if used with the `[` operator. For example, suppose we want to
+order this vector from smallest to largest:
+```{r}
+x = c(4, -6, 21, -2)
+```
+
+We can get the ordered vector by calling `order()` and then subsetting:
+```{r}
+indices = order(x)
+indices
+
+x[indices]
+```
+
+The `order()` function generalizes to data frames. If you get the ordering for
+a column, you can then use the ordering to subset the rows and reorder them.
+
+Use `order()` to find the 5 least expensive apartment advertisements in
+Berkeley. Print their price, number of bedrooms, and title. Are all of them ads
+for apartments?
+
+```{r}
+# Your code goes here.
+ids = order(file$price)
+print(file$price[ids][0:5])
+print(file$bedrooms[ids][0:5])
+print(file$title[ids][0:5])
+```
+
+YOUR WRITTEN ANSWER GOES HERE:
+They are not all ads for apartments. 
